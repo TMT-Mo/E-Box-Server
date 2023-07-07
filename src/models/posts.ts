@@ -7,7 +7,8 @@ const postSchema = new Schema(
   {
     title: { type: String, required: true},
     description: { type: String, required: true},
-    creator: {type: mongoose.Types.ObjectId, required: true, ref: Users}
+    creator: {type: mongoose.Types.ObjectId, required: true, ref: Users},
+    status: { type: String, required: true}
   },
   {
     toJSON: {

@@ -10,3 +10,7 @@ export const createPostValidator = (): ValidationChain[] => [
   check("description").notEmpty().withMessage("description is required"),
 ];
 
+export const createPostCategoryValidator = (): ValidationChain[] => [
+  check("name").notEmpty().withMessage("name is required"),
+];
+

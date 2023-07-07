@@ -50,6 +50,13 @@ export class InternalServer extends HttpError {
   }
 }
 
+export class Forbidden extends HttpError{
+  constructor(message: string = 'Forbidden!'){
+    super(message)
+    this.code = 403 
+  }
+}
+
 export class CreatedSuccessfully extends HttpSuccess{
   constructor(message: string = 'Create Successfully!'){
     super(message)

@@ -5,11 +5,25 @@ export enum StatusAccount {
 
 export enum ModelName{
     Users = 'users',
-    Posts = 'posts'
+    Posts = 'posts',
+    PostCategories = 'post-categories'
 }
 
-export const TOKEN_KEY = 'supersecret'
+export enum KEY{
+    TOKEN_KEY = 'supersecret',
+    REFRESH_TOKEN = 'refreshToken',
+    ACCESS_TOKEN = 'accessToken'
+}
 
+export enum StatusPost{
+    Process = "Process",
+    Approved = "Approved",
+    Rejected = "Rejected"
+}
+export enum StatusPostCategory{
+    ACTIVE = 1,
+    INACTIVE = 0
+}
 export enum MessageSuccess{
     CreateUser = 'Create user successfully!',
     UpdateUser = 'Update user successfully!',

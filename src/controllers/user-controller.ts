@@ -1,4 +1,6 @@
 import {
+  ICookies,
+  IDecodedUser,
   LoginRequest,
   UserCollection,
   UserRequestQuery,
@@ -10,16 +12,20 @@ import { CreateUserRequest, IUser } from "../types/users";
 import {
   BadRequest,
   CreatedSuccessfully,
+  Forbidden,
   InternalServer,
   NotFound,
   RequestSuccessfully,
+  Unauthorized,
 } from "../util/http-request";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { ResponseList } from "../util/classes";
 import { handleQuery } from "../util/helpers";
 import bcrypt from "bcryptjs";
-import { StatusAccount } from "../types/constants";
+import { KEY, StatusAccount } from "../types/constants";
+import { getConfigs } from "../configs/configs";
+import expressAsyncHandler from "express-async-handler";
 
 // ! [GET]: /api/user/getUserList
 const getUserList: MiddlewareFunction = async (req, res, next) => {
@@ -161,14 +167,75 @@ const login: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
-  let token: string;
-  try {
-    token = jwt.sign({ ...existUser }, "supersecret", { expiresIn: "1h" });
-  } catch (err) {
-    const error = new InternalServer();
+  const accessToken = jwt.sign(
+    {
+      username: existUser.username,
+      roleName: existUser.roleName,
+      id: existUser.id,
+    },
+    getConfigs().ACCESS_TOKEN_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  const refreshToken = jwt.sign(
+    {
+      username: existUser.username,
+      roleName: existUser.roleName,
+      id: existUser.id,
+    },
+    getConfigs().REFRESH_TOKEN_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  res.cookie(KEY.REFRESH_TOKEN, refreshToken, {
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: false
+  });
+  return next(res.status(200).json({ accessToken }));
+};
+
+const refreshToken: MiddlewareFunction = (req, res, next) => {
+  const cookies = req.cookies as ICookies;
+  const refreshToken = cookies?.refreshToken;
+
+  if (!refreshToken) {
+    const error = new Unauthorized();
     return next(res.status(error.code).json(error));
   }
-  return next(res.status(200).json({ token }));
+
+  jwt.verify(
+    refreshToken,
+    getConfigs().REFRESH_TOKEN_SECRET,
+    async (err, decoded: IDecodedUser & JwtPayload) => {
+      if (err) {
+        const error = new Forbidden();
+        return res.status(error.code).json(error);
+      }
+      let existUser: IUser;
+      try {
+        existUser = await UserModel.findOne({ username: decoded.username });
+      } catch (err) {
+        const error = new InternalServer();
+        return next(res.status(error.code).json(error));
+      }
+
+      if (!existUser) {
+        const error = new NotFound("User does not exist!");
+        return next(res.status(error.code).json(error));
+      }
+      const accessToken = jwt.sign(
+        {
+          username: existUser.username,
+          roleName: existUser.roleName,
+          id: existUser.id,
+        },
+        getConfigs().ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+      return res.status(200).json({ accessToken });
+    }
+  );
 };
 
 export const userController = {
@@ -176,4 +243,5 @@ export const userController = {
   createUser,
   login,
   updateUser,
+  refreshToken,
 };

@@ -41,30 +41,26 @@
   "paths": {
     "/api/user/createUser": {
       "post": {
+        "security": [{ "BearerAuth": [] }],
         "tags": ["Users"],
-        "description": "Create new user in system",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User that we want to create",
-            "schema": {
-              "$ref": "#/definitions/User"
+        "summary": "Create new user in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/createUser"
+              }
             }
           }
-        ],
-
+        },
         "produces": ["application/json"],
         "responses": {
           "201": {
-            "description": {
-              "message": "Create user successfully!",
-              "code": 201
-            },
+            "description": {},
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/definitions/User"
+                  "$ref": "#/definitions/SuccessResponse"
                 }
               }
             }
@@ -77,6 +73,40 @@
         "security": [{ "BearerAuth": [] }],
         "tags": ["Users"],
         "summary": "Get a list of users in system",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Size of a list of users in system",
+            "schema":{
+              "type":"number"
+            }
+          },
+          {
+            "name": "currentPage",
+            "in": "query",
+            "description": "Position of page reveals a list of users in system",
+            "schema":{
+              "type":"number"
+            }
+          },
+          {
+            "name": "roleName",
+            "in": "query",
+            "description": "Filter based on role name",
+            "schema":{
+              "type":"string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter based on status",
+            "schema":{
+              "type":"string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -94,39 +124,13 @@
     "/api/user/login": {
       "post": {
         "tags": ["Users"],
-        "description": "Login user into system and return a token",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User that we want to create",
-            "schema": {
-              "required": ["username", "password"],
-              "properties": {
-                "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
+        "summary": "Login user into system and return a token",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "required": ["username", "password"],
-                "properties": {
-                  "username": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  }
+                  "$ref":"#/definitions/login"
                 }
-              }
             }
           }
         },
@@ -148,76 +152,63 @@
         }
       }
     },
-    "/user/{id}": {
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "description": "ID of user that we want to find",
-          "type": "integer"
-        }
-      ],
-      "delete": {
-        "summary": "Delete user with given ID",
-        "tags": ["Users"],
-        "responses": {
-          "200": {
-            "description": "User is deleted",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update user with give ID",
-        "tags": ["Users"],
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User with new values of properties",
-            "schema": {
-              "$ref": "#/definitions/updateUser"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User is updated",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        }
-      }
-    },
     "/api/post/createPost": {
       "post": {
+        "security": [{ "BearerAuth": [] }],
         "tags": ["Posts"],
-        "description": "Create new post in system",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User that we want to create",
-            "schema": {
-              "$ref": "#/definitions/User"
+        "summary": "Create new post in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/createPost"
+              }
             }
           }
-        ],
+        },
         "produces": ["application/json"],
         "responses": {
           "201": {
             "description": {
-              "message": "Create user successfully!",
+              "message": "Create post successfully!",
               "code": 201
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/definitions/User"
+                  "$ref": "#/definitions/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/post/updatePost": {
+      "patch": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Posts"],
+        "summary": "Update an existed post in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/updatePost"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "description": {
+              "message": "Update post successfully!",
+              "code": 201
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/SuccessResponse"
                 }
               }
             }
@@ -230,13 +221,39 @@
         "security": [{ "BearerAuth": [] }],
         "tags": ["Posts"],
         "summary": "Get a list of posts in system",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Size of a list of posts in system",
+            "schema":{
+              "type":"number"
+            }
+          },
+          {
+            "name": "currentPage",
+            "in": "query",
+            "description": "Position of page reveals a list of posts in system",
+            "schema":{
+              "type":"number"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter based on status",
+            "schema":{
+              "type":"string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/definitions/getUserList"
+                  "$ref": "#/definitions/getPostList"
                 }
               }
             }
@@ -258,11 +275,31 @@
         "roleName": {
           "type": "string"
         },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
         "status": {
           "type": "number"
         },
         "posts": {
-          "type": "array"
+          "type": "array",
+          "default": []
+        }
+      }
+    },
+    "createUser": {
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "roleName": {
+          "type": "string"
         }
       }
     },
@@ -298,9 +335,39 @@
           "type": "string"
         },
         "status": {
-          "type": "number"
+          "type": "string"
         },
         "creator": {
+          "type": "string"
+        }
+      }
+    },
+    "createPost": {
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "updatePost": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       }
@@ -320,6 +387,36 @@
           "type": "number"
         },
         "total": {
+          "type": "number"
+        }
+      }
+    },
+    "login":{
+      "properties":{
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "SuccessResponse": {
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "number"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "properties": {
+        "errorMessage": {
+          "type": "string"
+        },
+        "code": {
           "type": "number"
         }
       }

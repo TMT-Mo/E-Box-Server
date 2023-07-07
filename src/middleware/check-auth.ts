@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { MiddlewareFunction } from "../types/configs";
-import { Unauthorized } from "../util/http-request";
+import { Forbidden, Unauthorized } from "../util/http-request";
+import { getConfigs } from "../configs/configs";
 
 export const checkAuth: MiddlewareFunction = (req, res, next) => {
   const error = new Unauthorized();
@@ -9,8 +10,14 @@ export const checkAuth: MiddlewareFunction = (req, res, next) => {
   }
   try {
     const token = req.headers.authorization.split(" ")[1];
-    next();
-    // const decodedToken = jwt.verify(token, "supersecret")
+    jwt.verify(token, getConfigs().ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        const error = new Forbidden();
+        return res.status(error.code).json(error);
+      }
+      console.log(decoded)
+      next();
+    });
   } catch (err) {
     return next(res.status(error.code).json(error));
   }

@@ -6,7 +6,7 @@ import { checkAuth } from "../middleware/check-auth";
 import { loginValidator } from "../util/express-validator";
 
 const router = express.Router();
-const { getUserList, createUser, login, updateUser } = userController;
+const { getUserList, createUser, login, updateUser, refreshToken } = userController;
 
 
 router.post(
@@ -14,7 +14,11 @@ router.post(
   loginValidator(),
   login
 );
+
+router.get(apis.user.refreshToken, refreshToken)
+
 router.use(checkAuth);
+
 router.get(apis.user.getUserList, getUserList);
 router.post(apis.user.createUser, createUser);
 router.patch(apis.user.updateUser, updateUser);

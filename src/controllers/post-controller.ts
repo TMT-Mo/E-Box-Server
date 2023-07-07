@@ -1,8 +1,11 @@
+import { StatusPostCategory } from "./../types/constants";
 import { NextFunction } from "express";
 import { MiddlewareFunction } from "../types/configs";
 import {
+  CreatePostCategoryRequest,
   CreatePostRequest,
   IPost,
+  IPostCategory,
   PostRequestQuery,
   UpdatePostRequest,
 } from "../types/posts";
@@ -19,6 +22,8 @@ import { PostModel } from "../models/posts";
 import mongoose from "mongoose";
 import { handleQuery } from "../util/helpers";
 import { ResponseList } from "../util/classes";
+import { StatusPost } from "../types/constants";
+import { PostCategoryModel } from "../models/post-categories";
 
 // ! [POST]: /api/post/createPost
 const createPost: MiddlewareFunction = async (req, res, next) => {
@@ -53,7 +58,10 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    const createdPost = new PostModel({ ...request });
+    const createdPost = new PostModel({
+      ...request,
+      status: StatusPost.Process,
+    });
     await createdPost.save({ session });
     user.posts.push(createdPost);
     await user.save({ session });
@@ -70,14 +78,16 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
 // ! [GET]: /api/post/getPostList
 const getPostList: MiddlewareFunction = async (req, res, next) => {
   const query = req.query as PostRequestQuery;
+  const { status } = query;
   const size = +query.size || undefined;
   const currentPage = +query.currentPage || undefined;
+  const queries = handleQuery({ status });
   let postList: mongoose.Document[] = [];
   const totalSkip = (currentPage - 1) * size;
   let total: number;
 
   try {
-    postList = await PostModel.find().skip(totalSkip).limit(size);
+    postList = await PostModel.find(queries).skip(totalSkip).limit(size);
   } catch (err) {
     const error = new InternalServer();
     return next(res.status(error.code).json(error));
@@ -89,8 +99,7 @@ const getPostList: MiddlewareFunction = async (req, res, next) => {
 
 // ! [PATCH]: /api/post/updatePost
 const updatePost: MiddlewareFunction = async (req, res, next) => {
-  console.log("first");
-  const { id, description, title } = req.body as UpdatePostRequest;
+  const { id, description, title, status } = req.body as UpdatePostRequest;
 
   let existedPost: mongoose.Document & IPost;
 
@@ -108,6 +117,7 @@ const updatePost: MiddlewareFunction = async (req, res, next) => {
 
   existedPost.title = title;
   existedPost.description = description;
+  existedPost.status = status;
 
   try {
     await existedPost.save();
@@ -120,8 +130,65 @@ const updatePost: MiddlewareFunction = async (req, res, next) => {
   return next(res.status(response.code).json(response));
 };
 
+// ! [POST]: /api/post/createCategory
+const createCategory: MiddlewareFunction = async (req, res, next) => {
+  // * Checking validation of user's input
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new BadRequest(errors.array()[0].msg);
+    return next(res.status(error.code).json(error));
+  }
+
+  const request = req.body as CreatePostCategoryRequest;
+
+  let category: mongoose.Document & IPostCategory;
+
+  try {
+    category = await PostCategoryModel.findOne({ name: request.name });
+  } catch (err) {
+    const error = new InternalServer(
+      "Something went wrong with finding category name!"
+    );
+    return next(res.status(error.code).json(error));
+  }
+
+  if (category) {
+    const error = new BadRequest("This category name already existed!");
+    return next(res.status(error.code).json(error));
+  }
+
+  try {
+    await PostCategoryModel.create({
+      ...request,
+      status: StatusPostCategory.ACTIVE,
+    });
+  } catch (err) {
+    const error = new InternalServer("Cannot add category!");
+    return next(res.status(error.code).json(error));
+  }
+
+  const response = new CreatedSuccessfully("Create category successfully!");
+  return next(res.status(response.code).json(response));
+};
+
+const getCategoryList: MiddlewareFunction = async (req, res, next) => {
+  let categoryList: Document[] = [];
+
+  try {
+    categoryList = await PostCategoryModel.find();
+  } catch (err) {
+    console.log(err);
+    const error = new InternalServer();
+    return next(res.status(error.code).json(error));
+  }
+
+  return next(res.json({ items: categoryList }));
+};
+
 export const postController = {
   createPost,
   getPostList,
   updatePost,
+  createCategory,
+  getCategoryList,
 };

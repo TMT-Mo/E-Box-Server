@@ -1,26 +1,39 @@
-export interface IPost{
-    id: string,
-    title: string,
-    description: string,
-    creator: number,
-    createdAt: Date,
-    updatedAt: Date,
-    status: number
+import { StatusPost } from "./constants";
+
+export interface IPost {
+  id: string;
+  title: string;
+  description: string;
+  creator: number;
+  createdAt: Date;
+  updatedAt: Date;
+  status: StatusPost;
 }
 
-export interface CreatePostRequest{
-    title: string,
-    description: string,
-    creator: number
+export interface IPostCategory {
+  id: string;
+  name: string;
+  status: string;
 }
 
-export interface UpdatePostRequest{
-    id: string,
-    title: string,
-    description: string,
+export interface CreatePostRequest {
+  title: string;
+  description: string;
+  creator: string;
+}
+export interface CreatePostCategoryRequest {
+  name: string;
 }
 
-export interface PostRequestQuery{
-    currentPage?: number;
-    size?: number;
-  }
+export interface UpdatePostRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: StatusPost;
+}
+
+export interface PostRequestQuery {
+  currentPage?: number;
+  size?: number;
+  status?: StatusPost;
+}
