@@ -192,7 +192,8 @@ const login: MiddlewareFunction = async (req, res, next) => {
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     secure: true,
-    sameSite: "none"
+    sameSite: "none",
+    domain: getConfigs().COOKIE_CORS_DOMAIN
   });
   return next(res.status(200).json({ accessToken }));
 };
