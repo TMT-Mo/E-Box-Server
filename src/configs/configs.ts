@@ -9,7 +9,6 @@ export const getConfigs = (): Config => {
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
     CLIENT_HOST: process.env.CLIENT_HOST,
-    CLIENT_LOCAL: process.env.CLIENT_LOCAL,
   };
 };
 //
