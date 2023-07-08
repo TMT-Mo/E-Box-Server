@@ -21,9 +21,15 @@ import { UserModel } from "../models/users";
 import { PostModel } from "../models/posts";
 import mongoose from "mongoose";
 import { handleQuery } from "../util/helpers";
-import { ResponseList } from "../util/classes";
+import { Activity, ResponseList } from "../util/classes";
 import { StatusPost } from "../types/constants";
 import { PostCategoryModel } from "../models/post-categories";
+import { activityController } from "./activity-controller";
+import axios from "axios";
+import { apis } from "../util/api";
+import { IActivity } from "../types/activities";
+
+const { saveActivity } = activityController;
 
 // ! [POST]: /api/post/createPost
 const createPost: MiddlewareFunction = async (req, res, next) => {
@@ -37,6 +43,8 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
   const request = req.body as CreatePostRequest;
 
   let user: mongoose.Document & IUser;
+  let category: mongoose.Document & IPostCategory;
+
   try {
     user = await UserModel.findById(request.creator);
   } catch (err) {
@@ -48,6 +56,22 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
 
   if (!user) {
     const error = new BadRequest("Cannot find user with the provided id.");
+    return next(res.status(error.code).json(error));
+  }
+
+  try {
+    category = await PostCategoryModel.findById(request.category);
+  } catch (err) {
+    const error = new InternalServer(
+      "Something went wrong with finding id category!"
+    );
+    return next(res.status(error.code).json(error));
+  }
+
+  if (!category) {
+    const error = new BadRequest(
+      "Cannot find post category with the provided id."
+    );
     return next(res.status(error.code).json(error));
   }
 
@@ -167,10 +191,18 @@ const createCategory: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
+  const activity: IActivity = {
+    title: "create a category",
+    description: `A new category called ${request.name} has been created.`,
+    creator: req.user.id,
+  };
+  const handleActivity = new Activity(activity);
+  handleActivity.saveActivity(req);
   const response = new CreatedSuccessfully("Create category successfully!");
   return next(res.status(response.code).json(response));
 };
 
+// ! [GET]: /api/post/getCategoryList
 const getCategoryList: MiddlewareFunction = async (req, res, next) => {
   let categoryList: Document[] = [];
 

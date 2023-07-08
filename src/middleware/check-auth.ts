@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken";
 import { MiddlewareFunction } from "../types/configs";
 import { Forbidden, Unauthorized } from "../util/http-request";
 import { getConfigs } from "../configs/configs";
+import { IDecodedUser } from "../types/users";
+import { Request } from "express";
+
 
 export const checkAuth: MiddlewareFunction = (req, res, next) => {
   const error = new Unauthorized();
@@ -10,12 +13,12 @@ export const checkAuth: MiddlewareFunction = (req, res, next) => {
   }
   try {
     const token = req.headers.authorization.split(" ")[1];
-    jwt.verify(token, getConfigs().ACCESS_TOKEN_SECRET, (err, decoded) => {
+    jwt.verify(token, getConfigs().ACCESS_TOKEN_SECRET, (err, decoded: IDecodedUser) => {
       if (err) {
         const error = new Forbidden();
         return res.status(error.code).json(error);
       }
-      console.log(decoded)
+      req.user = decoded
       next();
     });
   } catch (err) {

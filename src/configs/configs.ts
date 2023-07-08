@@ -7,7 +7,9 @@ export const getConfigs = (): Config => {
     MONGO_URL: process.env.MONGO_URL,
     PORT: process.env.PORT as unknown as number,
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+    CLIENT_HOST: process.env.CLIENT_HOST,
+    CLIENT_LOCAL: process.env.CLIENT_LOCAL,
   };
 };
 //

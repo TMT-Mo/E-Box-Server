@@ -1,7 +1,7 @@
 import mongoose, { Document, model } from "mongoose";
 import { ModelName } from "../types/constants";
 const { Schema } = mongoose;
-const { Users, Posts } = ModelName;
+const { Users, Posts, Activities } = ModelName;
 
 const userSchema = new Schema(
   {
@@ -11,7 +11,9 @@ const userSchema = new Schema(
     roleName: { type: String, require: true },
     createdAt: { type: Date, require: true },
     updatedAt: { type: Date, require: true },
-    posts: [{type: mongoose.Types.ObjectId, required: true, ref: Posts }]
+    posts: [{type: mongoose.Types.ObjectId, required: true, ref: Posts }],
+    activities: [{type: mongoose.Types.ObjectId, required: true, ref: Activities }]
+    
   },
   {
     toJSON: {

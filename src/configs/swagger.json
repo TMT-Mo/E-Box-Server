@@ -1,13 +1,16 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "My API",
-    "version": "1.0.0",
-    "description": "My API description"
+    "title": "E-Box API documentation",
+    "version": "1.0.2",
+    "description": "E-Box's API description"
   },
   "tags": [
     {
       "name": "Users"
+    },
+    {
+      "name": "Activities"
     },
     {
       "name": "Posts"
@@ -25,14 +28,26 @@
       "User": {
         "$ref": "#/definitions/User"
       },
-      "getUserList": {
-        "$ref": "#/definitions/getUserList"
+      "Activity": {
+        "$ref": "#/definitions/Activity"
+      },
+      "Post": {
+        "$ref": "#/definitions/Post"
       }
+
     }
   },
   "security": [
     {
       "BearerAuth": []
+    },
+    {
+      "myCookieAuth": {
+        "type": "apiKey",
+        "name": "refreshToken",
+        "in": "cookie",
+        "httpOnly": true
+      }
     }
   ],
   "schemes": ["http"],
@@ -68,6 +83,38 @@
         }
       }
     },
+    "/api/post/updateUser": {
+      "patch": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Users"],
+        "summary": "Update an existed user in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/updateUser"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "description": {
+              "message": "Update user successfully!",
+              "code": 201
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/getUserList": {
       "get": {
         "security": [{ "BearerAuth": [] }],
@@ -78,32 +125,32 @@
             "name": "size",
             "in": "query",
             "description": "Size of a list of users in system",
-            "schema":{
-              "type":"number"
+            "schema": {
+              "type": "number"
             }
           },
           {
             "name": "currentPage",
             "in": "query",
             "description": "Position of page reveals a list of users in system",
-            "schema":{
-              "type":"number"
+            "schema": {
+              "type": "number"
             }
           },
           {
             "name": "roleName",
             "in": "query",
             "description": "Filter based on role name",
-            "schema":{
-              "type":"string"
+            "schema": {
+              "type": "string"
             }
           },
           {
             "name": "status",
             "in": "query",
             "description": "Filter based on status",
-            "schema":{
-              "type":"string"
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -129,8 +176,8 @@
           "content": {
             "application/json": {
               "schema": {
-                  "$ref":"#/definitions/login"
-                }
+                "$ref": "#/definitions/login"
+              }
             }
           }
         },
@@ -141,10 +188,61 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "token": {
+                    "accessToken": {
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/refreshToken": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Send a new token with refreshToken in cookies( HttpOnly) when a current token got expired!",
+        "description": "Please login first to get a refresh token",
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/saveActivity": {
+      "post": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Activities"],
+        "summary": "Save user's activity in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/saveActivity"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/SuccessResponse"
                 }
               }
             }
@@ -226,24 +324,24 @@
             "name": "size",
             "in": "query",
             "description": "Size of a list of posts in system",
-            "schema":{
-              "type":"number"
+            "schema": {
+              "type": "number"
             }
           },
           {
             "name": "currentPage",
             "in": "query",
             "description": "Position of page reveals a list of posts in system",
-            "schema":{
-              "type":"number"
+            "schema": {
+              "type": "number"
             }
           },
           {
             "name": "status",
             "in": "query",
             "description": "Filter based on status",
-            "schema":{
-              "type":"string"
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -260,7 +358,55 @@
           }
         }
       }
+    },
+    "/api/post/createCategory": {
+      "post": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Posts"],
+        "summary": "Create new post category in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/createCategory"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/post/getCategoryList": {
+      "get": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Posts"],
+        "summary": "Get a list of post categories in system",
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/getCategoryList"
+                }
+              }
+            }
+          }
+        }
+      }
     }
+    
   },
   "definitions": {
     "User": {
@@ -287,6 +433,10 @@
         "posts": {
           "type": "array",
           "default": []
+        },
+        "activities": {
+          "type": "array",
+          "default": []
         }
       }
     },
@@ -299,6 +449,19 @@
           "type": "string"
         },
         "roleName": {
+          "type": "string"
+        }
+      }
+    },
+    "updateUser": {
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "roleName": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       }
@@ -322,6 +485,44 @@
         }
       }
     },
+    "Activity": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "saveActivity": {
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string",
+          "uniqueItems": true
+        }
+      }
+    },
     "Post": {
       "properties": {
         "id": {
@@ -339,6 +540,17 @@
         },
         "creator": {
           "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "category":{
+          "type": "string",
+          "uniqueItems": true
         }
       }
     },
@@ -391,8 +603,45 @@
         }
       }
     },
-    "login":{
-      "properties":{
+    "Post-Category": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "createCategory": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "getCategoryList": {
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Post-Category"
+          }
+        }
+      }
+    },
+    "login": {
+      "properties": {
         "username": {
           "type": "string"
         },
@@ -407,7 +656,8 @@
           "type": "string"
         },
         "code": {
-          "type": "number"
+          "type": "number",
+          "default": 201
         }
       }
     },

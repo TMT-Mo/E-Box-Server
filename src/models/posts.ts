@@ -1,14 +1,15 @@
 import mongoose, { Document, model } from "mongoose";
 import { ModelName } from "../types/constants";
 const { Schema } = mongoose;
-const { Posts, Users } = ModelName;
+const { Posts, Users, PostCategories } = ModelName;
 
 const postSchema = new Schema(
   {
     title: { type: String, required: true},
     description: { type: String, required: true},
     creator: {type: mongoose.Types.ObjectId, required: true, ref: Users},
-    status: { type: String, required: true}
+    status: { type: String, required: true},
+    category: {type: mongoose.Types.ObjectId, required: true, ref: PostCategories }
   },
   {
     toJSON: {

@@ -87,6 +87,7 @@ const createUser: MiddlewareFunction = async (req, res, next) => {
       posts: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      activities: []
     });
   } catch (err) {
     const error = new InternalServer();

@@ -1,12 +1,13 @@
 import mongoose, { Document, model } from "mongoose";
 import { ModelName } from "../types/constants";
 const { Schema } = mongoose;
-const { PostCategories } = ModelName;
+const { Activities, Users } = ModelName;
 
-const postCategorySchema = new Schema(
+const activitySchema = new Schema(
   {
-    name: { type: String, required: true },
-    status: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    creator: {type: mongoose.Types.ObjectId, required: true, ref: Users},
   },
   {
     toJSON: {
@@ -20,4 +21,4 @@ const postCategorySchema = new Schema(
   }
 );
 
-export const PostCategoryModel = model(PostCategories, postCategorySchema);
+export const ActivityModel = model(Activities, activitySchema);

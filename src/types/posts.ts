@@ -20,6 +20,7 @@ export interface CreatePostRequest {
   title: string;
   description: string;
   creator: string;
+  category: string
 }
 export interface CreatePostCategoryRequest {
   name: string;

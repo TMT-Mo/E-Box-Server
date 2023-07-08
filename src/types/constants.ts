@@ -6,7 +6,8 @@ export enum StatusAccount {
 export enum ModelName{
     Users = 'users',
     Posts = 'posts',
-    PostCategories = 'post-categories'
+    PostCategories = 'post-categories',
+    Activities = 'activities',
 }
 
 export enum KEY{

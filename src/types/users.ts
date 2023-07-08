@@ -9,6 +9,7 @@ export interface IUser {
   createdAt: Date;
   updatedAt: Date;
   posts: Document[];
+  activities: Document[];
 }
 
 export interface CreateUserRequest {
@@ -37,12 +38,12 @@ export interface UserRequestQuery {
 
 export type UserCollection = Document & IUser;
 
-export interface ICookies{
-  refreshToken?: string
+export interface ICookies {
+  refreshToken?: string;
 }
 
 export interface IDecodedUser {
-  id: string,
-  username:string,
-  roleName: string
+  id: string;
+  username: string;
+  roleName: string;
 }
