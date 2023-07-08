@@ -191,7 +191,8 @@ const login: MiddlewareFunction = async (req, res, next) => {
   res.cookie(KEY.REFRESH_TOKEN, refreshToken, {
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: true
+    secure: true,
+    sameSite: "none"
   });
   return next(res.status(200).json({ accessToken }));
 };
