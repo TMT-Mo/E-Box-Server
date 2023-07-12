@@ -16,11 +16,13 @@ import swaggerDocument from "./configs/swagger.json";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { activityRouter } from "./routes/activity-routes";
+import { commentRouter } from "./routes/comment-routes";
+import { roleRouter } from "./routes/role-routes";
 
 const app = express();
 const config = getConfigs();
 const { MONGO_URL, PORT, CLIENT_HOST } = config;
-const { user, post, activity } = apis;
+const { user, post, activity, comment, role } = apis;
 
 app.use(bodyParser.json());
 app.use(
@@ -44,6 +46,8 @@ app.use(cookieParser());
 app.use(post.head, postRouter);
 app.use(user.head, userRouter);
 app.use(activity.head, activityRouter);
+app.use(comment.head, commentRouter);
+app.use(role.head, roleRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const error = new InternalServer("Could not find this route!");

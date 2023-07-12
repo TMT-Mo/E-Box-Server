@@ -3,7 +3,7 @@ import { NextFunction } from "express";
 import { MiddlewareFunction } from "../types/configs";
 import {
   CreatePostCategoryRequest,
-  CreatePostRequest,
+  CreatePostBody,
   IPost,
   IPostCategory,
   PostRequestQuery,
@@ -40,7 +40,7 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
-  const request = req.body as CreatePostRequest;
+  const request = req.body as CreatePostBody;
 
   let user: mongoose.Document & IUser;
   let category: mongoose.Document & IPostCategory;
@@ -80,20 +80,19 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
   // * If both are successful, mongoose will commit transaction to save both changes.
   // * If one is failed, mongoose will return error.
   try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    const createdPost = new PostModel({
-      ...request,
-      status: StatusPost.Process,
-    });
-    await createdPost.save({ session });
-    user.posts.push(createdPost);
-    await user.save({ session });
-    await session.commitTransaction();
+    await PostModel.create(request);
   } catch (err) {
     const error = new InternalServer("Cannot add post!");
     return next(res.status(error.code).json(error));
   }
+
+  const activity: IActivity = {
+    title: "Create a post",
+    description: `A new post ${request.title} has been created`,
+    creator: req.user.id,
+  };
+  const handleActivity = new Activity(activity);
+  handleActivity.saveActivity(req);
 
   const response = new CreatedSuccessfully("Create post successfully!");
   return next(res.status(response.code).json(response));
@@ -150,6 +149,14 @@ const updatePost: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
+  const activity: IActivity = {
+    title: "Update a post",
+    description: `A post with id ${id} has been modified.`,
+    creator: req.user.id,
+  };
+  const handleActivity = new Activity(activity);
+  handleActivity.saveActivity(req);
+
   const response = new RequestSuccessfully("Update post successfully!");
   return next(res.status(response.code).json(response));
 };
@@ -196,8 +203,13 @@ const createCategory: MiddlewareFunction = async (req, res, next) => {
     description: `A new category called ${request.name} has been created.`,
     creator: req.user.id,
   };
-  const handleActivity = new Activity(activity);
-  handleActivity.saveActivity(req);
+  try {
+    const handleActivity = new Activity(activity);
+    await handleActivity.saveActivity(req);
+  } catch (error) {
+    console.log(error);
+  }
+
   const response = new CreatedSuccessfully("Create category successfully!");
   return next(res.status(response.code).json(response));
 };

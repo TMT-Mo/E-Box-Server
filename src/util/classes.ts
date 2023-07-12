@@ -1,6 +1,7 @@
 import axios from "axios";
 import { apis } from "./api";
 import { CustomExpressRequest } from "../types/configs";
+import { getConfigs } from "../configs/configs";
 
 export class ResponseList {
   items: any[];
@@ -41,9 +42,10 @@ export class Activity {
       creator: this.creator,
     };
     try {
-      await axios.post(`http://localhost:5000${head}${saveActivity}`, activity, {
+      await axios.post(`${getConfigs().SERVER_HOST}${head}${saveActivity}`, activity, {
         headers: { Authorization: req.headers.authorization },
       });
+      return
     } catch (error) {
       console.log(error)
     }

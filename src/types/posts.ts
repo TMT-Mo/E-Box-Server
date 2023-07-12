@@ -1,3 +1,4 @@
+import { ObjectId } from "mongoose";
 import { StatusPost } from "./constants";
 
 export interface IPost {
@@ -8,6 +9,7 @@ export interface IPost {
   createdAt: Date;
   updatedAt: Date;
   status: StatusPost;
+  category: string
 }
 
 export interface IPostCategory {
@@ -16,11 +18,11 @@ export interface IPostCategory {
   status: string;
 }
 
-export interface CreatePostRequest {
+export interface CreatePostBody {
   title: string;
   description: string;
   creator: string;
-  category: string
+  category: ObjectId
 }
 export interface CreatePostCategoryRequest {
   name: string;

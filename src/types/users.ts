@@ -1,26 +1,25 @@
-import { StatusAccount } from "./constants";
-import { Document } from "mongoose";
+import { CommonStatus } from "./constants";
+import { Document, ObjectId } from "mongoose";
+import { IRole } from "./roles";
 export interface IUser {
-  id: number;
+  id: string;
   username: string;
   password?: string;
-  status: StatusAccount;
-  roleName: string;
+  status: CommonStatus;
+  role: ObjectId | IRole;
   createdAt: Date;
   updatedAt: Date;
-  posts: Document[];
-  activities: Document[];
 }
 
-export interface CreateUserRequest {
+export interface CreateUserBody {
   username: string;
   password: string;
-  roleName: string;
+  role: string;
 }
 
 export interface UpdateUserRequest {
   username: string;
-  status: StatusAccount;
+  status: CommonStatus;
   roleName: string;
 }
 
@@ -33,17 +32,21 @@ export interface UserRequestQuery {
   currentPage?: number;
   size?: number;
   roleName?: string;
-  status?: StatusAccount;
+  status?: CommonStatus;
+}
+export interface GetUserByIdRequest {
+  id: string
 }
 
-export type UserCollection = Document & IUser;
+export interface UpdateUserBody extends IUser{
+}
 
 export interface ICookies {
   refreshToken?: string;
 }
 
-export interface IDecodedUser {
+export interface IDecodedUser extends Object{
   id: string;
   username: string;
-  roleName: string;
+  role: IRole;
 }

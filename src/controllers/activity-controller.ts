@@ -1,21 +1,28 @@
 import { validationResult } from "express-validator";
 import mongoose from "mongoose";
-import { PostModel } from "../models/posts";
 import { UserModel } from "../models/users";
 import { MiddlewareFunction } from "../types/configs";
-import { StatusPost } from "../types/constants";
-import { CreatePostRequest } from "../types/posts";
 import { IUser } from "../types/users";
 import {
   BadRequest,
   InternalServer,
-  CreatedSuccessfully,
 } from "../util/http-request";
 import { SaveActivityRequest } from "../types/activities";
 import { ActivityModel } from "../models/activities";
 
 // ! [GET]: /api/activity/getActivityList
-const getActivityList: MiddlewareFunction = (req, res, next) => {};
+const getActivityList: MiddlewareFunction = async (req, res, next) => {
+  let activityList: Document[];
+
+  try {
+    activityList = await ActivityModel.find();
+  } catch (err) {
+    const error = new InternalServer("Something went wrong with finding activity!");
+    return next(res.status(error.code).json(error));
+  }
+
+  return next(res.json({ items: activityList }));
+};
 
 // ! [POST]: /api/activity/createActivity
 const saveActivity: MiddlewareFunction = async (req, res, next) => {
@@ -47,23 +54,13 @@ const saveActivity: MiddlewareFunction = async (req, res, next) => {
   }
 
   try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    const createdActivity = new ActivityModel({
-      ...request,
-    });
-    await createdActivity.save({ session });
-    user.activities.push(createdActivity);
-    await user.save({ session });
-    await session.commitTransaction();
+    await ActivityModel.create(request)
   } catch (err) {
-    console.log(err);
     const error = new InternalServer("Cannot add activity!");
     return next(res.status(error.code).json(error));
   }
 
   console.log("Save activity successfully!");
-  return 
 };
 
 export const activityController = {

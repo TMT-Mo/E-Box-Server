@@ -1,14 +1,16 @@
 import {
+  CreateUserBody,
+  GetUserByIdRequest,
   ICookies,
   IDecodedUser,
   LoginRequest,
-  UserCollection,
+  UpdateUserBody,
   UserRequestQuery,
+  IUser,
 } from "./../types/users";
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { UserModel } from "../models/users";
 import { MiddlewareFunction } from "../types/configs";
-import { CreateUserRequest, IUser } from "../types/users";
 import {
   BadRequest,
   CreatedSuccessfully,
@@ -20,12 +22,17 @@ import {
 } from "../util/http-request";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { validationResult } from "express-validator";
-import { ResponseList } from "../util/classes";
+import { Activity, ResponseList } from "../util/classes";
 import { handleQuery } from "../util/helpers";
 import bcrypt from "bcryptjs";
-import { KEY, StatusAccount } from "../types/constants";
+import { KEY, CommonStatus } from "../types/constants";
 import { getConfigs } from "../configs/configs";
-import expressAsyncHandler from "express-async-handler";
+import { ObjectId } from "mongodb";
+import { RoleModel } from "../models/roles";
+import { IRole } from "../types/roles";
+import { IActivity } from "../types/activities";
+
+const { ACTIVE } = CommonStatus;
 
 // ! [GET]: /api/user/getUserList
 const getUserList: MiddlewareFunction = async (req, res, next) => {
@@ -49,24 +56,63 @@ const getUserList: MiddlewareFunction = async (req, res, next) => {
   return next(res.json(response));
 };
 
+// ! [GET]: /api/user/getUserById
+const getUserById: MiddlewareFunction = async (req, res, next) => {
+  const { id } = req.body as GetUserByIdRequest;
+  let user: Document & IUser;
+
+  try {
+    user = await UserModel.findById(id);
+  } catch (err) {
+    const error = new InternalServer();
+    return next(res.status(error.code).json(error));
+  }
+
+  let role: Document & IRole;
+
+  try {
+    role = await RoleModel.findById(user.role);
+  } catch (err) {
+    const error = new InternalServer("Error when finding role!");
+    return next(res.status(error.code).json(error));
+  }
+
+  return next(res.status(200).json({ ...user, role } as IUser));
+};
+
 // ! [POST]: /api/user/createUser
 const createUser: MiddlewareFunction = async (req, res, next) => {
-  const request = req.body as CreateUserRequest;
-  const { username, password, roleName } = request;
+  const request = req.body as CreateUserBody;
+  const { username, password, role } = request;
 
-  let existingUsername: IUser;
+  let existingUser: IUser;
+  let existingRole: IRole;
 
   // * Get user from db
   try {
-    existingUsername = await UserModel.findOne({ username });
+    existingUser = await UserModel.findOne({ username });
   } catch (err) {
     const error = new InternalServer();
     return next(res.status(error.code).json(error));
   }
 
   // * Check if user existed
-  if (existingUsername) {
+  if (existingUser) {
     const error = new BadRequest("User already existed!");
+    return next(res.status(error.code).json(error));
+  }
+
+  // * Get Role from db
+  try {
+    existingRole = await RoleModel.findById(role);
+  } catch (err) {
+    const error = new InternalServer("Something went wrong when finding role!");
+    return next(res.status(error.code).json(error));
+  }
+
+  // * Check if Role existed
+  if (!existingRole) {
+    const error = new BadRequest("Role does not exist!");
     return next(res.status(error.code).json(error));
   }
 
@@ -83,14 +129,14 @@ const createUser: MiddlewareFunction = async (req, res, next) => {
     await UserModel.create({
       ...request,
       password: hashPw,
-      status: StatusAccount.ACTIVE,
-      posts: [],
+      status: ACTIVE,
+      role: new ObjectId(role),
       createdAt: new Date(),
       updatedAt: new Date(),
-      activities: []
     });
   } catch (err) {
-    const error = new InternalServer();
+    console.log(err)
+    const error = new InternalServer("Cannot add user!");
     return next(res.status(error.code).json(error));
   }
   const response = new CreatedSuccessfully("Create user successfully!");
@@ -99,10 +145,10 @@ const createUser: MiddlewareFunction = async (req, res, next) => {
 
 // ! [PATCH]: /api/user/updateUser
 const updateUser: MiddlewareFunction = async (req, res, next) => {
-  const request = req.body as UserCollection;
-  const { username, roleName, status } = request;
+  const request = req.body as UpdateUserBody;
+  const { username, role, status, id } = request;
 
-  let existingUsername: UserCollection;
+  let existingUsername: UpdateUserBody & mongoose.Document;
 
   try {
     existingUsername = await UserModel.findOne({ username });
@@ -116,7 +162,22 @@ const updateUser: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
-  existingUsername.roleName = roleName;
+  let existingRole: IRole;
+  // * Get Role from db
+  try {
+    existingRole = await RoleModel.findById(role);
+  } catch (err) {
+    const error = new InternalServer();
+    return next(res.status(error.code).json(error));
+  }
+
+  // * Check if Role existed
+  if (!existingRole) {
+    const error = new BadRequest("Role does not exist!");
+    return next(res.status(error.code).json(error));
+  }
+
+  existingUsername.role = role;
   existingUsername.status = status;
 
   try {
@@ -125,6 +186,15 @@ const updateUser: MiddlewareFunction = async (req, res, next) => {
     const error = new InternalServer();
     return next(res.status(error.code).json(error));
   }
+
+  const activity: IActivity = {
+    title: "Update an user",
+    description: `An user with id ${id} has been modified.`,
+    creator: req.user.id,
+  };
+  const handleActivity = new Activity(activity);
+  handleActivity.saveActivity(req);
+  
   const response = new RequestSuccessfully("Update user successfully!");
   return next(res.status(response.code).json(response));
 };
@@ -153,6 +223,21 @@ const login: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
+  let existingRole: IRole;
+  // * Get Role from db
+  try {
+    existingRole = await RoleModel.findById(existUser.role);
+  } catch (err) {
+    const error = new InternalServer();
+    return next(res.status(error.code).json(error));
+  }
+
+  // * Check if Role existed
+  if (!existingRole) {
+    const error = new BadRequest("Role does not exist!");
+    return next(res.status(error.code).json(error));
+  }
+
   let compareHashPw: boolean;
   try {
     compareHashPw = await bcrypt.compare(password, existUser.password);
@@ -171,19 +256,19 @@ const login: MiddlewareFunction = async (req, res, next) => {
   const accessToken = jwt.sign(
     {
       username: existUser.username,
-      roleName: existUser.roleName,
       id: existUser.id,
-    },
+      role: existingRole,
+    } as IDecodedUser,
     getConfigs().ACCESS_TOKEN_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "30m" }
   );
 
   const refreshToken = jwt.sign(
     {
       username: existUser.username,
-      roleName: existUser.roleName,
       id: existUser.id,
-    },
+      role: existingRole,
+    } as IDecodedUser,
     getConfigs().REFRESH_TOKEN_SECRET,
     { expiresIn: "1d" }
   );
@@ -193,7 +278,7 @@ const login: MiddlewareFunction = async (req, res, next) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     secure: true,
     sameSite: "none",
-    domain: getConfigs().COOKIE_CORS_DOMAIN
+    domain: getConfigs().COOKIE_CORS_DOMAIN,
   });
   return next(res.status(200).json({ accessToken }));
 };
@@ -227,14 +312,30 @@ const refreshToken: MiddlewareFunction = (req, res, next) => {
         const error = new NotFound("User does not exist!");
         return next(res.status(error.code).json(error));
       }
+
+      let existingRole: IRole;
+      // * Get Role from db
+      try {
+        existingRole = await RoleModel.findById(existUser.role);
+      } catch (err) {
+        const error = new InternalServer();
+        return next(res.status(error.code).json(error));
+      }
+
+      // * Check if Role existed
+      if (!existingRole) {
+        const error = new BadRequest("Role does not exist!");
+        return next(res.status(error.code).json(error));
+      }
+
       const accessToken = jwt.sign(
         {
           username: existUser.username,
-          roleName: existUser.roleName,
+          role: existingRole,
           id: existUser.id,
-        },
+        } as IDecodedUser,
         getConfigs().ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "30m" }
       );
       return res.status(200).json({ accessToken });
     }
@@ -247,4 +348,5 @@ export const userController = {
   login,
   updateUser,
   refreshToken,
+  getUserById,
 };

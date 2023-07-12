@@ -3,10 +3,10 @@ import { userController } from "../controllers/user-controller";
 import { apis } from "../util/api";
 import { check } from "express-validator";
 import { checkAuth } from "../middleware/check-auth";
-import { loginValidator } from "../util/express-validator";
+import { createUserValidator, loginValidator, updateUserValidator } from "../util/express-validator";
 
 const router = express.Router();
-const { getUserList, createUser, login, updateUser, refreshToken } = userController;
+const { getUserList, createUser, login, updateUser, refreshToken, getUserById } = userController;
 
 
 router.post(
@@ -20,7 +20,8 @@ router.get(apis.user.refreshToken, refreshToken)
 router.use(checkAuth);
 
 router.get(apis.user.getUserList, getUserList);
-router.post(apis.user.createUser, createUser);
-router.patch(apis.user.updateUser, updateUser);
+router.get(apis.user.getUserById, getUserById);
+router.post(apis.user.createUser, createUserValidator(), createUser);
+router.patch(apis.user.updateUser, updateUserValidator(), updateUser);
 
 export const userRouter = router;

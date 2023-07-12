@@ -2,6 +2,7 @@ export const apis = {
   user: {
     head: "/api/user",
     getUserList: "/getUserList",
+    getUserById: "/getUserById",
     createUser: "/createUser",
     login: "/login",
     refreshToken: "/refreshToken",
@@ -19,5 +20,15 @@ export const apis = {
     head: "/api/activity",
     getActivityList: "/getActivityList",
     saveActivity: "/saveActivity",
+  },
+  role: {
+    head: "/api/role",
+    getRoleList: "/getRoleList",
+    createRole: "/createRole",
+  },
+  comment: {
+    head: "/api/comment",
+    getCommentList: "/getCommentList",
+    createComment: "/createComment",
   },
 };

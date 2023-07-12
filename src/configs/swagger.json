@@ -13,6 +13,12 @@
       "name": "Activities"
     },
     {
+      "name": "Roles"
+    },
+    {
+      "name": "Comments"
+    },
+    {
       "name": "Posts"
     }
   ],
@@ -31,10 +37,12 @@
       "Activity": {
         "$ref": "#/definitions/Activity"
       },
+      "Role": {
+        "$ref": "#/definitions/Role"
+      },
       "Post": {
         "$ref": "#/definitions/Post"
       }
-
     }
   },
   "security": [
@@ -405,8 +413,54 @@
           }
         }
       }
+    },
+    "/api/role/createRole": {
+      "post": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Roles"],
+        "summary": "Create new role in system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/createRole"
+              }
+            }
+          }
+        },
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role/getRoleList": {
+      "get": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Roles"],
+        "summary": "Get a list of roles in system",
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/getRoleList"
+                }
+              }
+            }
+          }
+        }
+      }
     }
-    
   },
   "definitions": {
     "User": {
@@ -448,7 +502,7 @@
         "password": {
           "type": "string"
         },
-        "roleName": {
+        "role": {
           "type": "string"
         }
       }
@@ -523,6 +577,30 @@
         }
       }
     },
+    "Role": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "createRole": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "Post": {
       "properties": {
         "id": {
@@ -548,7 +626,7 @@
         "updatedAt": {
           "type": "string"
         },
-        "category":{
+        "category": {
           "type": "string",
           "uniqueItems": true
         }
@@ -563,6 +641,12 @@
           "type": "string"
         },
         "status": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "category": {
           "type": "string"
         }
       }

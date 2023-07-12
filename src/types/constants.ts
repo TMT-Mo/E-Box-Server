@@ -1,4 +1,4 @@
-export enum StatusAccount {
+export enum CommonStatus {
     ACTIVE = 1,
     INACTIVE = 0
 }
@@ -8,6 +8,8 @@ export enum ModelName{
     Posts = 'posts',
     PostCategories = 'post-categories',
     Activities = 'activities',
+    Roles = 'roles',
+    Comments = 'comments'
 }
 
 export enum KEY{

@@ -8,7 +8,8 @@ export interface Config{
     ACCESS_TOKEN_SECRET: string,
     REFRESH_TOKEN_SECRET: string,
     CLIENT_HOST: string,
-    COOKIE_CORS_DOMAIN: string
+    SERVER_HOST: string,
+    COOKIE_CORS_DOMAIN: string,
 }
 
 // export type MiddlewareFunction = (req: Request, res: Response, next: NextFunction) => void
