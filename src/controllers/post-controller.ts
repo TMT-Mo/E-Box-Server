@@ -80,8 +80,9 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
   // * If both are successful, mongoose will commit transaction to save both changes.
   // * If one is failed, mongoose will return error.
   try {
-    await PostModel.create(request);
+    await PostModel.create({ ...request, status: StatusPost.Process, approver: null, feedback: null });
   } catch (err) {
+    console.log(err);
     const error = new InternalServer("Cannot add post!");
     return next(res.status(error.code).json(error));
   }
@@ -103,26 +104,34 @@ const getPostList: MiddlewareFunction = async (req, res, next) => {
   const query = req.query as PostRequestQuery;
   const { status } = query;
   const size = +query.size || undefined;
-  const currentPage = +query.currentPage || undefined;
+  const currentPage = +query.currentPage + 1 || undefined;
   const queries = handleQuery({ status });
   let postList: mongoose.Document[] = [];
   const totalSkip = (currentPage - 1) * size;
   let total: number;
 
   try {
-    postList = await PostModel.find(queries).skip(totalSkip).limit(size);
+    postList = await PostModel.find(queries)
+      .skip(totalSkip)
+      .limit(size)
+      .populate("creator", '-password')
+      .populate("approver", '-password')
+      .populate("category")
+      .exec();
+    total = await PostModel.count();
   } catch (err) {
     const error = new InternalServer();
     return next(res.status(error.code).json(error));
   }
 
+  console.log(postList);
   const response = new ResponseList(size, currentPage, total, postList);
   return next(res.json(response));
 };
 
 // ! [PATCH]: /api/post/updatePost
 const updatePost: MiddlewareFunction = async (req, res, next) => {
-  const { id, description, title, status } = req.body as UpdatePostRequest;
+  const { id, status, approver, feedback } = req.body as UpdatePostRequest;
 
   let existedPost: mongoose.Document & IPost;
 
@@ -137,10 +146,9 @@ const updatePost: MiddlewareFunction = async (req, res, next) => {
     const error = new BadRequest("This post does not exist!");
     return next(res.status(error.code).json(error));
   }
-
-  existedPost.title = title;
-  existedPost.description = description;
   existedPost.status = status;
+  existedPost.approver = approver;
+  existedPost.feedback = feedback
 
   try {
     await existedPost.save();

@@ -5,11 +5,13 @@ export interface IPost {
   id: string;
   title: string;
   description: string;
-  creator: number;
+  creator: string;
   createdAt: Date;
   updatedAt: Date;
   status: StatusPost;
-  category: string
+  category: string;
+  feedback: string;
+  approver: string
 }
 
 export interface IPostCategory {
@@ -33,6 +35,8 @@ export interface UpdatePostRequest {
   title: string;
   description: string;
   status: StatusPost;
+  approver: string;
+  feedback: string
 }
 
 export interface PostRequestQuery {

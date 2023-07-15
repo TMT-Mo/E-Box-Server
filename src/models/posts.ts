@@ -9,6 +9,8 @@ const postSchema = new Schema(
     description: { type: String, required: true },
     creator: { type: mongoose.Types.ObjectId, required: true, ref: Users },
     status: { type: String, required: true },
+    feedback: { type: String, required: false },
+    approver: { type: mongoose.Types.ObjectId, required: false, ref: Users },
     category: {
       type: mongoose.Types.ObjectId,
       required: true,
