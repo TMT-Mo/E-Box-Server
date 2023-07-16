@@ -3,26 +3,45 @@ import mongoose from "mongoose";
 import { UserModel } from "../models/users";
 import { MiddlewareFunction } from "../types/configs";
 import { IUser } from "../types/users";
+import { BadRequest, InternalServer } from "../util/http-request";
 import {
-  BadRequest,
-  InternalServer,
-} from "../util/http-request";
-import { SaveActivityRequest } from "../types/activities";
+  GetActivityByIdRequest,
+  GetActivityListRequest,
+  SaveActivityRequest,
+} from "../types/activities";
 import { ActivityModel } from "../models/activities";
 
 // ! [GET]: /api/activity/getActivityList
 const getActivityList: MiddlewareFunction = async (req, res, next) => {
+  const { id } = req.query as GetActivityListRequest;
   let activityList: Document[];
 
   try {
-    activityList = await ActivityModel.find();
+    activityList = await ActivityModel.find({ creator: id });
   } catch (err) {
-    const error = new InternalServer("Something went wrong with finding activity!");
+    const error = new InternalServer(
+      "Something went wrong with finding activity!"
+    );
     return next(res.status(error.code).json(error));
   }
 
   return next(res.json({ items: activityList }));
 };
+
+// // ! [GET]: /api/activity/getActivityById
+// const getActivityById: MiddlewareFunction = async (req, res, next) => {
+//   const {id} = req.body as GetActivityByIdRequest
+//   let activity: Document;
+
+//   try {
+//     activity = await ActivityModel.findById(id);
+//   } catch (err) {
+//     const error = new InternalServer("Something went wrong with finding activity!");
+//     return next(res.status(error.code).json(error));
+//   }
+
+//   return next(res.json({ activity }));
+// };
 
 // ! [POST]: /api/activity/createActivity
 const saveActivity: MiddlewareFunction = async (req, res, next) => {
@@ -54,7 +73,7 @@ const saveActivity: MiddlewareFunction = async (req, res, next) => {
   }
 
   try {
-    await ActivityModel.create(request)
+    await ActivityModel.create(request);
   } catch (err) {
     const error = new InternalServer("Cannot add activity!");
     return next(res.status(error.code).json(error));

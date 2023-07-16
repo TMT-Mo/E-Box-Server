@@ -80,7 +80,12 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
   // * If both are successful, mongoose will commit transaction to save both changes.
   // * If one is failed, mongoose will return error.
   try {
-    await PostModel.create({ ...request, status: StatusPost.Process, approver: null, feedback: null });
+    await PostModel.create({
+      ...request,
+      status: StatusPost.Process,
+      approver: null,
+      feedback: null,
+    });
   } catch (err) {
     console.log(err);
     const error = new InternalServer("Cannot add post!");
@@ -102,23 +107,31 @@ const createPost: MiddlewareFunction = async (req, res, next) => {
 // ! [GET]: /api/post/getPostList
 const getPostList: MiddlewareFunction = async (req, res, next) => {
   const query = req.query as PostRequestQuery;
-  const { status } = query;
+  const { status, title, category } = query;
   const size = +query.size || undefined;
   const currentPage = +query.currentPage + 1 || undefined;
-  const queries = handleQuery({ status });
+  const queries = handleQuery({ status, title ,category });
   let postList: mongoose.Document[] = [];
   const totalSkip = (currentPage - 1) * size;
   let total: number;
 
   try {
-    postList = await PostModel.find(queries)
+    postList = await PostModel.find({
+      ...queries,
+      title: { $regex: title ?? '', $options: "i" },
+      // category: { $regex: category ?? '', $options: "i" },
+    })
       .skip(totalSkip)
       .limit(size)
-      .populate("creator", '-password')
-      .populate("approver", '-password')
+      .populate("creator", "-password")
+      .populate("approver", "-password")
       .populate("category")
       .exec();
-    total = await PostModel.count();
+    total = await PostModel.count({
+      ...queries,
+      title: { $regex: title ?? '', $options: "i" },
+      // category: { $regex: category ?? '', $options: "i" },
+  });
   } catch (err) {
     const error = new InternalServer();
     return next(res.status(error.code).json(error));
@@ -148,7 +161,7 @@ const updatePost: MiddlewareFunction = async (req, res, next) => {
   }
   existedPost.status = status;
   existedPost.approver = approver;
-  existedPost.feedback = feedback
+  existedPost.feedback = feedback;
 
   try {
     await existedPost.save();

@@ -5,6 +5,7 @@ const { Activities, Users } = ModelName;
 
 const activitySchema = new Schema(
   {
+    // _id: {type: mongoose.Types.ObjectId, required: false},
     title: { type: String, required: true },
     description: { type: String, required: true },
     creator: {type: mongoose.Types.ObjectId, required: true, ref: Users},

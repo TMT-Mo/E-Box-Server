@@ -19,6 +19,7 @@ export const apis = {
   activity: {
     head: "/api/activity",
     getActivityList: "/getActivityList",
+    getActivityById: "/getActivityById",
     saveActivity: "/saveActivity",
   },
   role: {

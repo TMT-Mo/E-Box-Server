@@ -258,6 +258,35 @@
         }
       }
     },
+    "/api/activity/getActivityList": {
+      "get": {
+        "security": [{ "BearerAuth": [] }],
+        "tags": ["Activities"],
+        "summary": "Get user's activities in system",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Id Owner in system",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/getActivityList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/post/createPost": {
       "post": {
         "security": [{ "BearerAuth": [] }],
@@ -574,6 +603,13 @@
         "creator": {
           "type": "string",
           "uniqueItems": true
+        }
+      }
+    },
+    "getActivityList": {
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     },
