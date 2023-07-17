@@ -15,4 +15,5 @@ export interface GetActivityByIdRequest {
 }
 export interface GetActivityListRequest {
   id?: string;
+  size?: number
 }

@@ -13,11 +13,12 @@ import { ActivityModel } from "../models/activities";
 
 // ! [GET]: /api/activity/getActivityList
 const getActivityList: MiddlewareFunction = async (req, res, next) => {
-  const { id } = req.query as GetActivityListRequest;
-  let activityList: Document[];
-
+  const { id, size } = req.query as GetActivityListRequest;
+  let activityList: mongoose.Document[];
+  let total: number
   try {
-    activityList = await ActivityModel.find({ creator: id });
+    activityList = await ActivityModel.find({ creator: id }).limit(size || 5);
+    total = await ActivityModel.count()
   } catch (err) {
     const error = new InternalServer(
       "Something went wrong with finding activity!"
@@ -25,7 +26,7 @@ const getActivityList: MiddlewareFunction = async (req, res, next) => {
     return next(res.status(error.code).json(error));
   }
 
-  return next(res.json({ items: activityList }));
+  return next(res.json({ items: activityList, total }));
 };
 
 // // ! [GET]: /api/activity/getActivityById
