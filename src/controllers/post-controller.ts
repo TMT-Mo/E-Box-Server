@@ -122,7 +122,7 @@ const getPostList: MiddlewareFunction = async (req, res, next) => {
       // category: { $regex: category ?? '', $options: "i" },
     })
       .skip(totalSkip)
-      .limit(size)
+      .limit(size).sort({ createdAt: 'desc' })
       .populate("creator", "-password")
       .populate("approver", "-password")
       .populate("category")

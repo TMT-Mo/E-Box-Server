@@ -17,7 +17,7 @@ const getActivityList: MiddlewareFunction = async (req, res, next) => {
   let activityList: mongoose.Document[];
   let total: number
   try {
-    activityList = await ActivityModel.find({ creator: id }).limit(size || 5);
+    activityList = await ActivityModel.find({ creator: id }).limit(size || 5).sort({ createdAt: 'desc' });
     total = await ActivityModel.count()
   } catch (err) {
     const error = new InternalServer(
