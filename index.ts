@@ -71,6 +71,6 @@ mongoose
   .connect(MONGO_URL)
   .then(() => {
     console.log("connected");
-    app.listen(PORT || 3000);
+    app.listen(3000);
   })
   .catch((err) => console.log(err));
