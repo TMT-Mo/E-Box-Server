@@ -1,3 +1,4 @@
+import dotenv  from 'dotenv';
 import express, {
   NextFunction,
   Request,
@@ -18,18 +19,19 @@ import cookieParser from "cookie-parser";
 import { activityRouter } from "./routes/activity-routes";
 import { commentRouter } from "./routes/comment-routes";
 import { roleRouter } from "./routes/role-routes";
-import { MongoClient } from "mongodb";
 // 
 const app = express();
 const config = getConfigs();
-const { MONGO_URL, PORT, CLIENT_HOST } = config;
+dotenv.config()
+const { MONGO_URL, CLIENT_HOST } = config;
 const { user, post, activity, comment, role } = apis;
 
 mongoose.set('strictQuery', false);
 
+const PORT = process.env.PORT || 3000
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(MONGO_URL);
+    const conn = await mongoose.connect(process.env.MONGO_URL);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.log(error);
