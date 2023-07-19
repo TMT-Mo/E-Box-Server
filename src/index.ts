@@ -5,19 +5,19 @@ import express, {
   ErrorRequestHandler,
 } from "express";
 import mongoose from "mongoose";
-import { getConfigs } from "./src/configs/configs";
-import { apis } from "./src/util/api";
-import { userRouter } from "./src/routes/user-routes";
-import { InternalServer } from "./src/util/http-request";
+import { getConfigs } from "./configs/configs";
+import { apis } from "./util/api";
+import { userRouter } from "./routes/user-routes";
+import { InternalServer } from "./util/http-request";
 import bodyParser from "body-parser";
-import { postRouter } from "./src/routes/post-routes";
+import { postRouter } from "./routes/post-routes";
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./src/configs/swagger.json";
+import swaggerDocument from "./configs/swagger.json";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { activityRouter } from "./src/routes/activity-routes";
-import { commentRouter } from "./src/routes/comment-routes";
-import { roleRouter } from "./src/routes/role-routes";
+import { activityRouter } from "./routes/activity-routes";
+import { commentRouter } from "./routes/comment-routes";
+import { roleRouter } from "./routes/role-routes";
 // 
 const app = express();
 const config = getConfigs();
@@ -51,6 +51,7 @@ app.use(user.head, userRouter);
 app.use(activity.head, activityRouter);
 app.use(comment.head, commentRouter);
 app.use(role.head, roleRouter);
+
 app.get("/abc", (req, res, next: NextFunction) => {
   res.send({
     title: "abc",
@@ -71,6 +72,6 @@ mongoose
   .connect(MONGO_URL)
   .then(() => {
     console.log("connected");
-    app.listen(3000);
+    app.listen(PORT || 3000);
   })
   .catch((err) => console.log(err));

@@ -3,13 +3,13 @@
     "target": "es6",
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "esModuleInterop": true,
     "sourceMap": true,
     "typeRoots": ["./global.d.ts", "./node_modules/@types"],
-    "baseUrl": "",
+    "baseUrl": "/src",
     "paths": {
-      "@/*": ["/*"]
+      "@/*": ["src/*"]
     },
     "resolveJsonModule": true
   }
