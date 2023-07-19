@@ -67,7 +67,8 @@ app.use(user.head, userRouter);
 // app.use(comment.head, commentRouter);
 // app.use(role.head, roleRouter);
 
-app.get("/abc", (req, res, next: NextFunction) => {
+app.get("/", (req, res, next: NextFunction) => {
+  console.log('hello')
   res.send({
     title: "abc",
   });
@@ -85,6 +86,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 connectDB().then(() => {
   app.listen(PORT, () => {
-      console.log("listening for requests");
+      console.log(`listening for requests ${PORT}`);
   })
 })
