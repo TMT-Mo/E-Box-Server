@@ -24,6 +24,17 @@ const config = getConfigs();
 const { MONGO_URL, PORT, CLIENT_HOST } = config;
 const { user, post, activity, comment, role } = apis;
 
+mongoose.set('strictQuery', false);
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URL);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+}
+
 app.use(bodyParser.json());
 app.use(
   cors({
@@ -68,10 +79,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   return next(res.status(error.code).json(error));
 });
 
-mongoose
-  .connect(MONGO_URL)
-  .then(() => {
-    console.log("connected");
-    app.listen(PORT || 3000);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+      console.log("listening for requests");
   })
-  .catch((err) => console.log(err));
+})
