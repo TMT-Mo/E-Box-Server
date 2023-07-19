@@ -31,7 +31,7 @@ app.use(
     origin: true,
   })
 );
-// 
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", CLIENT_HOST);
   res.setHeader("Access-Control-Allow-Credentials", "true");
