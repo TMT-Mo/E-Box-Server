@@ -61,11 +61,11 @@ app.use((req, res, next) => {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(cookieParser());
-app.use(post.head, postRouter);
+// app.use(post.head, postRouter);
 app.use(user.head, userRouter);
-app.use(activity.head, activityRouter);
-app.use(comment.head, commentRouter);
-app.use(role.head, roleRouter);
+// app.use(activity.head, activityRouter);
+// app.use(comment.head, commentRouter);
+// app.use(role.head, roleRouter);
 
 app.get("/abc", (req, res, next: NextFunction) => {
   res.send({
