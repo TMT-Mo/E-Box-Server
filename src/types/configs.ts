@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express"
 import { IDecodedUser } from "./users"
 
 export interface Config{
-    MONGO_URL: string,
+    MONGO_URI: string,
     PORT: number,
     ACCESS_TOKEN_SECRET: string,
     REFRESH_TOKEN_SECRET: string,

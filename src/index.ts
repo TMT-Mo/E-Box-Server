@@ -23,7 +23,7 @@ import { roleRouter } from "./routes/role-routes";
 const app = express();
 const config = getConfigs();
 dotenv.config()
-const { MONGO_URL, CLIENT_HOST } = config;
+const { MONGO_URI, CLIENT_HOST } = config;
 const { user, post, activity, comment, role } = apis;
 
 mongoose.set('strictQuery', false);
@@ -31,7 +31,7 @@ mongoose.set('strictQuery', false);
 const PORT = process.env.PORT || 3000
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URL);
+    const conn = await mongoose.connect(process.env.MONGO_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.log(error);
