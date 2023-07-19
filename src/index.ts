@@ -38,7 +38,7 @@ const connectDB = async () => {
     process.exit(1);
   }
 }
-
+// 
 app.use(bodyParser.json());
 app.use(
   cors({
