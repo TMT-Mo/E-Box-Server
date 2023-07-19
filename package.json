@@ -26,6 +26,7 @@
     "mongoose": "^7.2.4",
     "nodemon": "^2.0.22",
     "normalize-mongoose": "^1.0.0",
+    "rimraf": "^5.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
     "ts-node": "^10.9.1",
@@ -33,6 +34,7 @@
   },
   "scripts": {
     "start": "ts-node ./src/index.ts",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "build": "rimraf dist && tsc"
   }
 }
