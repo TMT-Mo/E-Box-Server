@@ -48,6 +48,11 @@ app.use(user.head, userRouter);
 app.use(activity.head, activityRouter);
 app.use(comment.head, commentRouter);
 app.use(role.head, roleRouter);
+app.use('/abc', (req,res: Response, next: NextFunction) => {
+  return next(res.json({
+    title: 'abc'
+  }))
+})
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const error = new InternalServer("Could not find this route!");
