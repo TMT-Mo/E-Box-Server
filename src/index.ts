@@ -18,6 +18,7 @@ import cookieParser from "cookie-parser";
 import { activityRouter } from "./routes/activity-routes";
 import { commentRouter } from "./routes/comment-routes";
 import { roleRouter } from "./routes/role-routes";
+import { MongoClient } from "mongodb";
 // 
 const app = express();
 const config = getConfigs();
@@ -25,9 +26,10 @@ const { MONGO_URL, PORT, CLIENT_HOST } = config;
 const { user, post, activity, comment, role } = apis;
 
 mongoose.set('strictQuery', false);
+
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URL);
+    const conn = await mongoose.connect(MONGO_URL);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.log(error);
